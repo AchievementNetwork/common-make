@@ -1,0 +1,21 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: cimg/go:1.15
+    steps:
+      - checkout
+      - run:
+          name: Test Make Recipes
+          command: |
+            make test
+
+workflows:
+  version: 2
+  "Simple Tests":
+    jobs:
+      - test:
+          filters:
+            branches:
+              only: /.*/
