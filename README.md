@@ -82,71 +82,33 @@ include go-common.mk
 ### Include
 
 In all cases the Makefile will ultimately reference one or more of the `*-common.mk`
-files in this package, usually through the use of the `include` directive.  However,
-there are a number of options on how this directive can be resolved.
+files in this package, usually through the use of the `include` directive.  While the
+include directive itself is simple, it is worth mentioning how to obtain the file being
+included.
 
-#### Dynamic download
+While it is possible to have a Make recipe that defines how to create the file being
+included, the recommendation is that a copy of the file be downloaded manually and
+checked in as part of setting up the repository.  The benefits of this include:
 
-In this option, the Makefile includes a target for creating the common make file that
-is included by downloading it from Github as well as an `include` directive.  In this
-case the name of the common make file that is downloaded should be added to
-`.gitignore` for the package so that it is not inadvertently committed.
+* Simple set up for developers (cloning the repository is all they need to do)
+* Consistent behaviour across a development team (all developers are working with the same copy of the common make infrastructure in a given repository)
+* Repositories are fully self-contained
+* The maintainers of the repository are in control of common make updates
 
-`curl` will be used in the following examples to illustrate a variety of forms this
-could take.
+A copy of the common make file infrastructure can be downloaded in a variety of ways,
+including the use of the GitHub Web UI, or the use of a command line tool such as
+`curl`, e.g.
 
-Get the most recent version of `go-common-mk`:
-
-```make
-include go-common.mk
-
-go-common.mk:
-	curl -O -L https://raw.github.com/AchievementNetwork/common-make/master/go-common.mk
+```
+curl -O -L https://raw.github.com/AchievementNetwork/common-make/master/go-common.mk
 ```
 
-Get the version for a specific release:
+The downloaded `go-common.mk` (or whatever common make file is being used) should then
+be added to the local repository with the relevant VCS.
 
-```make
-include go-common.mk
+**The checked in file should not be modified locally, as this will make managing updates more complex**
 
-go-common.mk:
-	curl -O -L https://raw.github.com/AchievementNetwork/common-make/1.0.0/go-common.mk
-```
-
-Get the version for a specific commit:
-
-```make
-include go-common.mk
-
-go-common.mk:
-	curl -O -L https://raw.github.com/AchievementNetwork/common-make/<commit-hash>/go-common.mk
-```
-
-__Pros__
-
-* New common make features will be pulled in automatically as they are added (although see the caveat in the __Cons__ section)
-* Depending on the download recipe used, package maintainers have flexibility in whether they will automatically pick up none, some, or all updates
-
-__Cons__
-
-* All users, including the package builder, must have network access in order to build the package, at least initially
-* Developers may need to periodically to refresh the common make files if another developer starts using the features of a newer version
-
-#### Local copy
-
-In this option, a copy of the appropriate `*-common.mk` file(s) are downloaded manually and
-checked into the package being built.  In this case the Makefile can just use the
-`include` directive with no additional complications.
-
-__Pros__
-
-* The Makefile only needs a simple include statement
-* The package is self-contained and fully in control of pulling in future common make infrastructure updates
-
-__Cons__
-
-* Developers may make local changes to the common make infrastructure which are not fed upstream, making future updates painful or even infeasible in the worst cases
-* The package will not pick up any common make updates without manual intervention
+#### Updates
 
 
 ### Overriding variables
