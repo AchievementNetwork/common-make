@@ -100,7 +100,7 @@ including the use of the GitHub Web UI, or the use of a command line tool such a
 `curl`, e.g.
 
 ```
-curl -O -L https://raw.github.com/AchievementNetwork/common-make/master/go-common.mk
+curl -O -L https://raw.github.com/AchievementNetwork/common-make/main/go-common.mk
 ```
 
 The downloaded `go-common.mk` (or whatever common make file is being used) should then
@@ -108,8 +108,21 @@ be added to the local repository with the relevant VCS.
 
 **The checked in file should not be modified locally, as this will make managing updates more complex**
 
-#### Updates
+#### Updating
 
+To check if there are common make file updates run
+
+```
+make _checkcommonupdate
+```
+
+If updates are required, then run
+
+```
+make _commonupdate
+```
+
+The build should be tested locally before the updated files are committed
 
 ### Overriding variables
 
