@@ -36,6 +36,7 @@ These variables are used by the standard targets and may be overridden:
 * __GOTARGETS__ - A list of the executables to build.  Defaults to the project name
 * __GOCMDDIR__ - The location of the directory containing the sub-directories for the executables to be built.  Defaults to `./cmd`
 * __GOROOTTARGET__ - Can be set to the name of a single target from `GOTARGETS` if the main executable code for it is in the top level directory.  No default
+* __GOLIBRARYTARGET__ - A target to pass to `go build` when an executable shouldn't be produced.  It would typically be set to `./...` in that situation.  No default
 * __GOSRC__ - A list of the Go source files.  Defaults to all Go source files recursively found in the current directory
 * __GO__ - The Go executable to run.  Defaults to `go`
 * __GOFLAGS__ - Flags to pass to `go build`.  No default
