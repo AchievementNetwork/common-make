@@ -19,6 +19,7 @@ GO ?= go
 GOSRC ?= $(shell find . -name '*.go')
 GOTARGETS ?= $(PROJECT)
 GOROOTTARGET ?=
+GOLIBRARYTARGET ?=
 GOFLAGS ?=
 GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -v -race
@@ -33,8 +34,13 @@ ifdef GOROOTTARGET
 _GO_BUILD_TARGETS := $(addprefix $(BUILDDIR)/,$(filter-out $(GOROOTTARGET),$(GOTARGETS)))
 _GO_ROOT_BUILD_TARGET := $(addprefix $(BUILDDIR)/,$(GOROOTTARGET))
 else
+ifdef GOTARGETS
 _GO_BUILD_TARGETS := $(addprefix $(BUILDDIR)/,$(GOTARGETS))
 _GO_ROOT_BUILD_TARGET :=
+else
+_GO_BUILD_TARGETS :=
+_GO_ROOT_BUILD_TARGET :=
+endif
 endif
 
 ## Targets
@@ -56,6 +62,11 @@ build:: pre-build standard-build post-build
 pre-build::
 
 standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS)
+ifdef GOLIBRARYTARGET
+	$(GO) generate ./...
+	$(GO) get ./...
+	$(GO) build $(GOFLAGS) $(GOLIBRARYTARGET)
+endif
 
 post-build::
 
@@ -65,7 +76,9 @@ clean:: pre-clean standard-clean post-clean
 pre-clean::
 
 standard-clean::
+ifdef _GO_BUILD_TARGETS
 	-$(RM) $(_GO_BUILD_TARGETS)
+endif
 ifdef _GO_ROOT_BUILD_TARGET
 	-$(RM) $(_GO_ROOT_BUILD_TARGET)
 endif
