@@ -1,3 +1,5 @@
+PROJECT=$(shell basename $(CURDIR))
+
 build:
 	@mkdir -p build
 	touch build/test05
@@ -9,7 +11,7 @@ testcover:
 	touch coverage.html
 
 %: force
-	@$(MAKE) -f ../../go-common.mk $@
+	@$(MAKE) PROJECT=$(PROJECT) -f ../../go-common.mk $@
 
 force: ;
 
