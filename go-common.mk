@@ -28,6 +28,8 @@ GOLIBRARYTARGET ?=
 GOFLAGS ?=
 GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -v -race
+GOTESTCOVERRAW ?= coverage.raw
+GOTESTCOVERHTML ?= coverage.html
 GOCMDDIR ?= ./cmd
 
 # Default output directory for executables and associated (copied) files
@@ -87,7 +89,7 @@ endif
 ifdef _GO_ROOT_BUILD_TARGET
 	-$(RM) $(_GO_ROOT_BUILD_TARGET)
 endif
-	-$(RM) coverage.raw coverage.html
+	-$(RM) $(GOTESTCOVERRAW) $(GOTESTCOVERHTML)
 	-rmdir $(BUILDDIR)
 
 post-clean::
@@ -118,7 +120,7 @@ testcover:: pre-testcover standard-testcover post-testcover
 
 pre-testcover::
 
-standard-testcover:: coverage.html
+standard-testcover:: $(GOTESTCOVERHTML)
 
 post-testcover::
 
@@ -145,10 +147,10 @@ _commonupdate::
 # Names may change at any time
 
 # Test coverage files
-coverage.raw:
+$(GOTESTCOVERRAW):
 	$(GO) test $(GOTESTFLAGS) -coverprofile=$@ $(GOTESTTARGET)
 
-coverage.html: coverage.raw
+$(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	$(GO) tool cover -html=$< -o $@
 
 # Go executables
