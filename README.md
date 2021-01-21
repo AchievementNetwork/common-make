@@ -42,6 +42,8 @@ These variables are used by the standard targets and may be overridden:
 * __GOFLAGS__ - Flags to pass to `go build`.  No default
 * __GOTESTTARGET__ - The target to pass to `go test`.  Defaults to `./...`, which means all tests in the project
 * __GOTESTFLAGS__ - Flags to pass to `go test`.  Defaults to `-v -race`
+* __GOTESTCOVERRAW__ - File to write raw test coverage data to.  Defaults to `coverage.raw`
+* __GOTESTCOVERHTML__ - File to write HTML formatted test coverage data to.  Defaults to `coverage.html`
 
 
 ## Copy
