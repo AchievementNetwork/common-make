@@ -31,7 +31,7 @@ actions for `standard-` sub-target.  The others are provided to allow custom act
 
 These variables are used by the standard targets and may be overridden:
 
-* __PROJECT__ - The name of the project being built.  Defaults to the name of the current directory (which should be also the name of the repository)
+* __PROJECT__ - The name of the project being built.  Defaults to the name of the repository or the current directory (if there is no git repository)
 * __BUILDDIR__ - The location that build artifacts will be placed in.  Defaults to `./build`
 * __GOTARGETS__ - A list of the executables to build.  Defaults to the project name
 * __GOCMDDIR__ - The location of the directory containing the sub-directories for the executables to be built.  Defaults to `./cmd`

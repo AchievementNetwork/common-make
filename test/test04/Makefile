@@ -1,3 +1,4 @@
+PROJECT=$(shell basename $(CURDIR))
 COPYTARGETS=data/foo data/bar
 
 pre-build::
