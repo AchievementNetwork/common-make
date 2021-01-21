@@ -12,7 +12,12 @@
 # These may be overridden by the repo Makefile
 
 # Default project name
+PROJECT_REPO_URL := $(shell git config --get remote.origin.url 2> /dev/null)
+ifdef PROJECT_REPO_URL
+PROJECT ?= $(shell basename -s .git $(PROJECT_REPO_URL))
+else
 PROJECT ?= $(shell basename $(CURDIR))
+endif
 
 # Standard go variables
 GO ?= go
