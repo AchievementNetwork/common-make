@@ -43,6 +43,8 @@ These variables are used by the standard targets and may be overridden:
 * __GOSRC__ - A list of the Go source files.  Defaults to all Go source files recursively found in the current directory
 * __GO__ - The Go executable to run.  Defaults to `go`
 * __GOFLAGS__ - Flags to pass to `go build`.  No default
+* __GORUNGET__ - Run `go get` prior to building if defined.  Defaults to defined
+* __GORUNGENERATE__ - Run `go generate` prior to building if defined.  Defaults to defined
 * __GOTESTTARGET__ - The target to pass to `go test`.  Defaults to `./...`, which means all tests in the project
 * __GOTESTFLAGS__ - Flags to pass to `go test`.  Defaults to `-v -race`
 * __GOTESTCOVERRAW__ - File to write raw test coverage data to.  Defaults to `coverage.raw`

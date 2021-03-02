@@ -20,17 +20,19 @@ PROJECT ?= $(shell basename $(CURDIR))
 endif
 
 # Standard go variables
-GO ?= go
-GOSRC ?= $(shell find . -name '*.go')
 GOTARGETS ?= $(PROJECT)
+GOCMDDIR ?= ./cmd
 GOROOTTARGET ?=
 GOLIBRARYTARGET ?=
+GOSRC ?= $(shell find . -name '*.go')
+GO ?= go
 GOFLAGS ?=
+GORUNGENERATE ?= yes
+GORUNGET ?= yes
 GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -v -race
 GOTESTCOVERRAW ?= coverage.raw
 GOTESTCOVERHTML ?= coverage.html
-GOCMDDIR ?= ./cmd
 
 # Default output directory for executables and associated (copied) files
 BUILDDIR ?= build
@@ -70,8 +72,12 @@ pre-build::
 
 standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS)
 ifdef GOLIBRARYTARGET
+ifdef GORUNGENERATE
 	$(GO) generate ./...
+endif # GORUNGENERATE
+ifdef GORUNGET
 	$(GO) get ./...
+endif # GORUNGET
 	$(GO) build $(GOFLAGS) $(GOLIBRARYTARGET)
 endif
 
@@ -156,14 +162,22 @@ $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 # Go executables
 $(_GO_ROOT_BUILD_TARGET): $(GOSRC)
 	@-mkdir build 2> /dev/null
+ifdef GORUNGENERATE
 	$(GO) generate ./...
+endif # GORUNGENERATE
+ifdef GORUNGET
 	$(GO) get ./...
+endif # GORUNGET
 	$(GO) build $(GOFLAGS) -o $@ .
 
 $(_GO_BUILD_TARGETS): $(GOSRC)
 	@-mkdir build 2> /dev/null
+ifdef GORUNGENERATE
 	$(GO) generate ./...
+endif # GORUNGENERATE
+ifdef GORUNGET
 	$(GO) get ./...
+endif # GORUNGET
 	$(GO) build $(GOFLAGS) -o $@ $(GOCMDDIR)/$(notdir $@)
 
 # Print the value of a variable
