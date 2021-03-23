@@ -118,6 +118,9 @@ test:: pre-test standard-test post-test
 pre-test::
 
 standard-test::
+ifdef GORUNGET
+	$(GO) get -t ./...
+endif # GORUNGET
 	$(GO) test $(GOTESTFLAGS) $(GOTESTTARGET)
 
 post-test::
@@ -154,6 +157,9 @@ _commonupdate::
 
 # Test coverage files
 $(GOTESTCOVERRAW):
+ifdef GORUNGET
+	$(GO) get -t ./...
+endif # GORUNGET
 	$(GO) test $(GOTESTFLAGS) -coverprofile=$@ $(GOTESTTARGET)
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
