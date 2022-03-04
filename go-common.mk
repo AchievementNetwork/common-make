@@ -164,6 +164,12 @@ endif # GORUNGET
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	$(GO) tool cover -html=$< -o $@
+	# To allow Code Climate to understand our uploaded coverage files
+	case "$$(grep '^module' go.mod | awk -F/ '{print$$NF}')" in \
+		v[0-9]) \
+			sed -i'' -e 's!/v[0-9]/!/!' "$(GOTESTCOVERRAW)" "$(GOTESTCOVERHTML)" \
+			;; \
+	esac
 
 # Go executables
 $(_GO_ROOT_BUILD_TARGET): $(GOSRC)
