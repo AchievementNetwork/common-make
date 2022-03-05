@@ -164,10 +164,11 @@ endif # GORUNGET
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	$(GO) tool cover -html=$< -o $@
-	# To allow Code Climate to understand our uploaded coverage files
-	case "$$(grep '^module' go.mod | awk -F/ '{print$$NF}')" in \
+	@# To allow Code Climate to understand our uploaded coverage files
+	@case "$$(grep '^module' go.mod | awk -F/ '{print$$NF}')" in \
 		v[0-9]) \
-			sed -i '' -e 's!/v[0-9]/!/!' "$(GOTESTCOVERRAW)" "$(GOTESTCOVERHTML)" \
+			sed -i.versioned -e 's!/v[0-9]/!/!' "$(GOTESTCOVERRAW)" "$(GOTESTCOVERHTML)" && \
+			rm -f "$(GOTESTCOVERRAW).versioned" "$(GOTESTCOVERHTML).versioned" \
 			;; \
 	esac
 
