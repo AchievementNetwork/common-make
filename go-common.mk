@@ -184,7 +184,7 @@ endif # GORUNGET
 	$(GO) build $(GOFLAGS) -o $@ .
 
 $(_GO_BUILD_TARGETS): $(GOSRC)
-	@-mkdir build 2> /dev/null
+	@-mkdir $(BUILDDIR) 2> /dev/null
 ifdef GORUNGENERATE
 	$(GO) generate ./...
 endif # GORUNGENERATE
