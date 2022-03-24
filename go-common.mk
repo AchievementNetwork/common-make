@@ -26,6 +26,7 @@ GOROOTTARGET ?=
 GOLIBRARYTARGET ?=
 GOSRC ?= $(shell find . -name '*.go')
 GO ?= go
+GODEBUG ?=
 GOFLAGS ?=
 GORUNGENERATE ?= yes
 GORUNGET ?= yes
@@ -49,8 +50,12 @@ _GO_ROOT_BUILD_TARGET :=
 else
 _GO_BUILD_TARGETS :=
 _GO_ROOT_BUILD_TARGET :=
-endif
-endif
+endif # GOTARGETS
+endif # GOROOTTARGET
+
+ifdef GODEBUG
+GOFLAGS += -gcflags "all=-N -l"
+endif # GODEBUG
 
 ## Targets
 
