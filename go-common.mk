@@ -75,7 +75,7 @@ build:: pre-build standard-build post-build
 
 pre-build::
 
-standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS)
+standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS) go.mod
 ifdef GOLIBRARYTARGET
 ifdef GORUNGENERATE
 	$(GO) generate ./...
