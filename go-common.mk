@@ -75,7 +75,7 @@ build:: pre-build standard-build post-build
 
 pre-build::
 
-standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS)
+standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS) go.mod
 ifdef GOLIBRARYTARGET
 ifdef GORUNGENERATE
 	$(GO) generate ./...
@@ -178,7 +178,7 @@ $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	esac
 
 # Go executables
-$(_GO_ROOT_BUILD_TARGET): $(GOSRC)
+$(_GO_ROOT_BUILD_TARGET): $(GOSRC) go.mod
 	@-mkdir build 2> /dev/null
 ifdef GORUNGENERATE
 	$(GO) generate ./...
@@ -188,7 +188,7 @@ ifdef GORUNGET
 endif # GORUNGET
 	$(GO) build $(GOFLAGS) -o $@ .
 
-$(_GO_BUILD_TARGETS): $(GOSRC)
+$(_GO_BUILD_TARGETS): $(GOSRC) go.mod
 	@-mkdir $(BUILDDIR) 2> /dev/null
 ifdef GORUNGENERATE
 	$(GO) generate ./...
