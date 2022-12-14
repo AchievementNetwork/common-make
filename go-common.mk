@@ -31,7 +31,7 @@ GOFLAGS ?=
 GORUNGENERATE ?= yes
 GORUNGET ?= yes
 GOTESTTARGET ?= ./...
-GOTESTFLAGS ?= -v -race
+GOTESTFLAGS ?= -race
 GOTESTCOVERRAW ?= coverage.raw
 GOTESTCOVERHTML ?= coverage.html
 
