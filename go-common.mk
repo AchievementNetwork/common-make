@@ -112,7 +112,7 @@ pre-lint::
 
 standard-lint::
 	@which golangci-lint > /dev/null 2>&1 || \
-		$(GO) get github.com/golangci/golangci-lint/cmd/golangci-lint
+		$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint
 	golangci-lint run
 
 post-lint::
