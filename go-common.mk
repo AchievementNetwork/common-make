@@ -27,7 +27,7 @@ GOLIBRARYTARGET ?=
 GOSRC ?= $(shell find . -name '*.go')
 GO ?= go
 GODEBUG ?=
-GOFLAGS ?=
+GOBUILDFLAGS ?=
 GORUNGENERATE ?= yes
 GORUNGET ?= yes
 GOTESTTARGET ?= ./...
@@ -54,7 +54,7 @@ endif # GOTARGETS
 endif # GOROOTTARGET
 
 ifdef GODEBUG
-GOFLAGS += -gcflags "all=-N -l"
+GOBUILDFLAGS += -gcflags "all=-N -l"
 endif # GODEBUG
 
 ## Targets
@@ -83,7 +83,7 @@ endif # GORUNGENERATE
 ifdef GORUNGET
 	$(GO) get ./...
 endif # GORUNGET
-	$(GO) build $(GOFLAGS) $(GOLIBRARYTARGET)
+	$(GO) build $(GOBUILDFLAGS) $(GOLIBRARYTARGET)
 endif
 
 post-build::
@@ -186,7 +186,7 @@ endif # GORUNGENERATE
 ifdef GORUNGET
 	$(GO) get ./...
 endif # GORUNGET
-	$(GO) build $(GOFLAGS) -o $@ .
+	$(GO) build $(GOBUILDFLAGS) -o $@ .
 
 $(_GO_BUILD_TARGETS): $(GOSRC) go.mod
 	@-mkdir $(BUILDDIR) 2> /dev/null
@@ -196,7 +196,7 @@ endif # GORUNGENERATE
 ifdef GORUNGET
 	$(GO) get ./...
 endif # GORUNGET
-	$(GO) build $(GOFLAGS) -o $@ $(GOCMDDIR)/$(notdir $@)
+	$(GO) build $(GOBUILDFLAGS) -o $@ $(GOCMDDIR)/$(notdir $@)
 
 # Print the value of a variable
 _printvar-go-%: ; @echo $($*)
