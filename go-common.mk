@@ -34,6 +34,7 @@ GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -race
 GOTESTCOVERRAW ?= coverage.raw
 GOTESTCOVERHTML ?= coverage.html
+GOLINTFLAGS ?= --timeout 2m
 
 # Default output directory for executables and associated (copied) files
 BUILDDIR ?= build
@@ -113,7 +114,7 @@ pre-lint::
 standard-lint::
 	@which golangci-lint > /dev/null 2>&1 || \
 		$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	golangci-lint run
+	golangci-lint run $(GOLINTFLAGS)
 
 post-lint::
 
