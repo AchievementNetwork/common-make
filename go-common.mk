@@ -34,7 +34,7 @@ GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -race
 GOTESTCOVERRAW ?= coverage.raw
 GOTESTCOVERHTML ?= coverage.html
-GOLINTFLAGS ?= --timeout 2m
+GOLINTFLAGS ?= --timeout 5m
 
 # Default output directory for executables and associated (copied) files
 BUILDDIR ?= build
