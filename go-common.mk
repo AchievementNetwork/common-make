@@ -28,10 +28,12 @@ GOSRC ?= $(shell find . -name '*.go')
 GO ?= go
 GODEBUG ?=
 GOBUILDFLAGS ?=
+GOBUILDENV ?=
 GORUNGENERATE ?= yes
 GORUNGET ?= yes
 GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -race
+GOTESTENV ?=
 GOTESTCOVERRAW ?= coverage.raw
 GOTESTCOVERHTML ?= coverage.html
 GOLINTFLAGS ?= --timeout 5m
@@ -84,7 +86,7 @@ endif # GORUNGENERATE
 ifdef GORUNGET
 	$(GO) get ./...
 endif # GORUNGET
-	$(GO) build $(GOBUILDFLAGS) $(GOLIBRARYTARGET)
+	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) $(GOLIBRARYTARGET)
 endif
 
 post-build::
@@ -127,7 +129,7 @@ standard-test::
 ifdef GORUNGET
 	$(GO) get -t ./...
 endif # GORUNGET
-	$(GO) test $(GOTESTFLAGS) $(GOTESTTARGET)
+	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) $(GOTESTTARGET)
 
 post-test::
 
@@ -166,7 +168,7 @@ $(GOTESTCOVERRAW):
 ifdef GORUNGET
 	$(GO) get -t ./...
 endif # GORUNGET
-	$(GO) test $(GOTESTFLAGS) -coverprofile=$@ $(GOTESTTARGET)
+	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=$@ $(GOTESTTARGET)
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	$(GO) tool cover -html=$< -o $@
@@ -187,7 +189,7 @@ endif # GORUNGENERATE
 ifdef GORUNGET
 	$(GO) get ./...
 endif # GORUNGET
-	$(GO) build $(GOBUILDFLAGS) -o $@ .
+	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) -o $@ .
 
 $(_GO_BUILD_TARGETS): $(GOSRC) go.mod
 	@-mkdir $(BUILDDIR) 2> /dev/null
@@ -197,7 +199,7 @@ endif # GORUNGENERATE
 ifdef GORUNGET
 	$(GO) get ./...
 endif # GORUNGET
-	$(GO) build $(GOBUILDFLAGS) -o $@ $(GOCMDDIR)/$(notdir $@)
+	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) -o $@ $(GOCMDDIR)/$(notdir $@)
 
 # Print the value of a variable
 _printvar-go-%: ; @echo $($*)
