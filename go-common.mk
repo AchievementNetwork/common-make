@@ -182,7 +182,7 @@ ifdef GORUNGET
 	$(GO) get
 endif # GORUNGET
 
-generate: depdencncies
+generate: dependencies
 ifdef GORUNGENERATE
 	$(GO) generate ./...
 endif # GORUNGENERATE
