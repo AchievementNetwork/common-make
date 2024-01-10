@@ -62,7 +62,7 @@ endif # GODEBUG
 
 ## Targets
 
-.PHONY: build clean lint test testcover
+.PHONY: build clean lint test testcover generate dependencies
 .PHONY: pre-build standard-build post-build
 .PHONY: pre-clean standard-clean post-clean
 .PHONY: pre-lint standard-lint post-lint
@@ -78,14 +78,8 @@ build:: pre-build standard-build post-build
 
 pre-build::
 
-standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS) go.mod
+standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS) generate dependencies
 ifdef GOLIBRARYTARGET
-ifdef GORUNGENERATE
-	$(GO) generate ./...
-endif # GORUNGENERATE
-ifdef GORUNGET
-	$(GO) get ./...
-endif # GORUNGET
 	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) $(GOLIBRARYTARGET)
 endif
 
@@ -114,9 +108,9 @@ lint:: pre-lint standard-lint post-lint
 pre-lint::
 
 standard-lint::
-	@which golangci-lint > /dev/null 2>&1 || \
-		$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	golangci-lint run $(GOLINTFLAGS)
+	go mod why github.com/golangci/golangci-lint/cmd/golangci-lint 2> /dev/null | grep 'does not need package' > /dev/null 2>&1 && \
+		echo "golangci-lint is not installed in your go module - please add it in a suitable tools.go file. See other go projects for details."
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint run $(GOLINTFLAGS)
 
 post-lint::
 
@@ -125,10 +119,7 @@ test:: pre-test standard-test post-test
 
 pre-test::
 
-standard-test::
-ifdef GORUNGET
-	$(GO) get -t ./...
-endif # GORUNGET
+standard-test:: dependencies
 	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) $(GOTESTTARGET)
 
 post-test::
@@ -164,10 +155,7 @@ _commonupdate::
 # Names may change at any time
 
 # Test coverage files
-$(GOTESTCOVERRAW):
-ifdef GORUNGET
-	$(GO) get -t ./...
-endif # GORUNGET
+$(GOTESTCOVERRAW): dependencies
 	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=$@ $(GOTESTTARGET)
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
@@ -181,25 +169,23 @@ $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	esac
 
 # Go executables
-$(_GO_ROOT_BUILD_TARGET): $(GOSRC) go.mod
+$(_GO_ROOT_BUILD_TARGET): $(GOSRC) generate dependencies
 	@-mkdir build 2> /dev/null
-ifdef GORUNGENERATE
-	$(GO) generate ./...
-endif # GORUNGENERATE
-ifdef GORUNGET
-	$(GO) get ./...
-endif # GORUNGET
 	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) -o $@ .
 
-$(_GO_BUILD_TARGETS): $(GOSRC) go.mod
+$(_GO_BUILD_TARGETS): $(GOSRC) generate dependencies
 	@-mkdir $(BUILDDIR) 2> /dev/null
+	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) -o $@ $(GOCMDDIR)/$(notdir $@)
+
+dependencies: go.mod
+ifdef GORUNGET
+	$(GO) get
+endif # GORUNGET
+
+generate: depdencncies
 ifdef GORUNGENERATE
 	$(GO) generate ./...
 endif # GORUNGENERATE
-ifdef GORUNGET
-	$(GO) get ./...
-endif # GORUNGET
-	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) -o $@ $(GOCMDDIR)/$(notdir $@)
 
 # Print the value of a variable
 _printvar-go-%: ; @echo $($*)
