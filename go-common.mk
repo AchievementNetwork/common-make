@@ -179,7 +179,7 @@ $(_GO_BUILD_TARGETS): $(GOSRC) generate dependencies
 
 dependencies: go.mod
 ifdef GORUNGET
-	$(GO) get
+	$(GO) get -t ./...
 endif # GORUNGET
 
 generate: dependencies
