@@ -1,4 +1,4 @@
 PROJECT=$(shell basename $(CURDIR))
-GOTARGETS=$(PROJECT) aux
+GOTARGETS=$(PROJECT) other
 
 include ../../go-common.mk
