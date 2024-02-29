@@ -30,7 +30,6 @@ GODEBUG ?=
 GOBUILDFLAGS ?=
 GOBUILDENV ?=
 GORUNGENERATE ?= yes
-GORUNGET ?= yes
 GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -race
 GOTESTENV ?=
@@ -62,9 +61,10 @@ endif # GODEBUG
 
 ## Targets
 
-.PHONY: build clean lint test testcover generate dependencies
+.PHONY: build clean generate lint test testcover
 .PHONY: pre-build standard-build post-build
 .PHONY: pre-clean standard-clean post-clean
+.PHONY: pre-generate standard-generate post-generate
 .PHONY: pre-lint standard-lint post-lint
 .PHONY: pre-test standard-test post-test
 .PHONY: pre-testcover standard-testcover post-testcover
@@ -78,7 +78,7 @@ build:: pre-build standard-build post-build
 
 pre-build::
 
-standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS) generate dependencies
+standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS) generate
 ifdef GOLIBRARYTARGET
 	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) $(GOLIBRARYTARGET)
 endif
@@ -102,14 +102,26 @@ endif
 
 post-clean::
 
+# Generate code
+generate:: pre-generate standard-generate post-generate
+
+pre-generate::
+
+standard-generate::
+ifdef GORUNGENERATE
+	$(GO) generate ./...
+endif # GORUNGENERATE
+
+post-generate::
+
 # Lint code
 lint:: pre-lint standard-lint post-lint
 
 pre-lint::
 
 standard-lint::
-	go mod why github.com/golangci/golangci-lint/cmd/golangci-lint 2> /dev/null | grep 'does not need package' > /dev/null 2>&1 && \
-		echo "golangci-lint is not installed in your go module - please add it in a suitable tools.go file. See other go projects for details."
+	go mod why github.com/golangci/golangci-lint/cmd/golangci-lint 2> /dev/null | ( ! grep "does not need package" > /dev/null 2>&1 ) || \
+		(echo "!!!!! golangci-lint is not installed in your go module - please add it in a suitable tools.go file. For example, see here: https://github.com/AchievementNetwork/quiz-api/blob/main/tools.go"; exit 1)
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint run $(GOLINTFLAGS)
 
 post-lint::
@@ -119,7 +131,7 @@ test:: pre-test standard-test post-test
 
 pre-test::
 
-standard-test:: dependencies
+standard-test::
 	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) $(GOTESTTARGET)
 
 post-test::
@@ -155,7 +167,7 @@ _commonupdate::
 # Names may change at any time
 
 # Test coverage files
-$(GOTESTCOVERRAW): dependencies
+$(GOTESTCOVERRAW):
 	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=$@ $(GOTESTTARGET)
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
@@ -169,23 +181,14 @@ $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	esac
 
 # Go executables
-$(_GO_ROOT_BUILD_TARGET): $(GOSRC) generate dependencies
+$(_GO_ROOT_BUILD_TARGET): $(GOSRC) generate
 	@-mkdir build 2> /dev/null
 	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) -o $@ .
 
-$(_GO_BUILD_TARGETS): $(GOSRC) generate dependencies
+$(_GO_BUILD_TARGETS): $(GOSRC) generate
 	@-mkdir $(BUILDDIR) 2> /dev/null
 	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) -o $@ $(GOCMDDIR)/$(notdir $@)
 
-dependencies: go.mod
-ifdef GORUNGET
-	$(GO) get -t ./...
-endif # GORUNGET
-
-generate: dependencies
-ifdef GORUNGENERATE
-	$(GO) generate ./...
-endif # GORUNGENERATE
 
 # Print the value of a variable
 _printvar-go-%: ; @echo $($*)
