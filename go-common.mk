@@ -30,13 +30,13 @@ GODEBUG ?=
 GOBUILDFLAGS ?=
 GOBUILDENV ?=
 GORUNGENERATE ?= yes
-GORUNGET ?= yes
 GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -race
 GOTESTENV ?=
 GOTESTCOVERRAW ?= coverage.raw
 GOTESTCOVERHTML ?= coverage.html
 GOLINTFLAGS ?= --timeout 5m
+GOLINTERIMPORTPATH ?= github.com/golangci/golangci-lint/cmd/golangci-lint
 
 # Default output directory for executables and associated (copied) files
 BUILDDIR ?= build
@@ -62,9 +62,10 @@ endif # GODEBUG
 
 ## Targets
 
-.PHONY: build clean lint test testcover
+.PHONY: build clean generate lint test testcover
 .PHONY: pre-build standard-build post-build
 .PHONY: pre-clean standard-clean post-clean
+.PHONY: pre-generate standard-generate post-generate
 .PHONY: pre-lint standard-lint post-lint
 .PHONY: pre-test standard-test post-test
 .PHONY: pre-testcover standard-testcover post-testcover
@@ -78,14 +79,8 @@ build:: pre-build standard-build post-build
 
 pre-build::
 
-standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS) go.mod
+standard-build:: $(_GO_ROOT_BUILD_TARGET) $(_GO_BUILD_TARGETS) generate
 ifdef GOLIBRARYTARGET
-ifdef GORUNGENERATE
-	$(GO) generate ./...
-endif # GORUNGENERATE
-ifdef GORUNGET
-	$(GO) get ./...
-endif # GORUNGET
 	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) $(GOLIBRARYTARGET)
 endif
 
@@ -108,15 +103,33 @@ endif
 
 post-clean::
 
+# Generate code
+generate:: pre-generate standard-generate post-generate
+
+pre-generate::
+
+standard-generate::
+ifdef GORUNGENERATE
+	$(GO) generate ./...
+endif # GORUNGENERATE
+
+post-generate::
+
 # Lint code
 lint:: pre-lint standard-lint post-lint
 
 pre-lint::
 
-standard-lint::
-	@which golangci-lint > /dev/null 2>&1 || \
-		$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	golangci-lint run $(GOLINTFLAGS)
+standard-lint:: generate
+	$(GO) mod why $(GOLINTERIMPORTPATH) 2> /dev/null | \
+		tail -1 | grep '^$(GOLINTERIMPORTPATH)$$' 2>&1 > /dev/null || \
+		( if [ -f tools.go ]; then \
+			eval "$$_common_make_tools_lint_help"; \
+		  else \
+			eval "$$_common_make_no_tools_lint_help"; \
+		  fi; \
+		  exit 1 )
+	$(GO) run github.com/golangci/golangci-lint/cmd/golangci-lint run $(GOLINTFLAGS)
 
 post-lint::
 
@@ -125,10 +138,7 @@ test:: pre-test standard-test post-test
 
 pre-test::
 
-standard-test::
-ifdef GORUNGET
-	$(GO) get -t ./...
-endif # GORUNGET
+standard-test:: generate
 	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) $(GOTESTTARGET)
 
 post-test::
@@ -137,7 +147,7 @@ testcover:: pre-testcover standard-testcover post-testcover
 
 pre-testcover::
 
-standard-testcover:: $(GOTESTCOVERHTML)
+standard-testcover:: generate $(GOTESTCOVERHTML)
 
 post-testcover::
 
@@ -165,9 +175,6 @@ _commonupdate::
 
 # Test coverage files
 $(GOTESTCOVERRAW):
-ifdef GORUNGET
-	$(GO) get -t ./...
-endif # GORUNGET
 	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=$@ $(GOTESTTARGET)
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
@@ -181,25 +188,49 @@ $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	esac
 
 # Go executables
-$(_GO_ROOT_BUILD_TARGET): $(GOSRC) go.mod
+$(_GO_ROOT_BUILD_TARGET): $(GOSRC) generate
 	@-mkdir build 2> /dev/null
-ifdef GORUNGENERATE
-	$(GO) generate ./...
-endif # GORUNGENERATE
-ifdef GORUNGET
-	$(GO) get ./...
-endif # GORUNGET
 	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) -o $@ .
 
-$(_GO_BUILD_TARGETS): $(GOSRC) go.mod
+$(_GO_BUILD_TARGETS): $(GOSRC) generate
 	@-mkdir $(BUILDDIR) 2> /dev/null
-ifdef GORUNGENERATE
-	$(GO) generate ./...
-endif # GORUNGENERATE
-ifdef GORUNGET
-	$(GO) get ./...
-endif # GORUNGET
 	$(GOBUILDENV) $(GO) build $(GOBUILDFLAGS) -o $@ $(GOCMDDIR)/$(notdir $@)
+
 
 # Print the value of a variable
 _printvar-go-%: ; @echo $($*)
+
+# Lint-related messages
+define __common_make_no_tools_lint_help
+cat <<EOF
+No dependency on golangci-lint found!
+
+Please create a top level tools.go file with contents like
+
+-
+//go:build tools
+// +build tools
+
+package tools
+
+import _ "github.com/golangci/golangci-lint/cmd/golangci-lint"
+-
+
+(the package may need adjusting) and then run 'go mod tidy'.
+
+Then commit the new file and changes to 'go.mod' and 'go.sum'.
+EOF
+endef
+export _common_make_no_tools_lint_help = $(value __common_make_no_tools_lint_help)
+
+define __common_make_tools_lint_help
+cat <<EOF
+No dependency on golangci-lint found!
+
+Please add an import of "github.com/golangci/golangci-lint/cmd/golangci-lint"
+to the tools.go file and then run 'go mod tidy'.
+
+Then commit the changes to the file and changes to 'go.mod' and 'go.sum'.
+EOF
+endef
+export _common_make_tools_lint_help = $(value __common_make_tools_lint_help)
