@@ -36,6 +36,7 @@ GOTESTENV ?=
 GOTESTCOVERRAW ?= coverage.raw
 GOTESTCOVERHTML ?= coverage.html
 GOLINTFLAGS ?= --timeout 5m
+GOLINTERIMPORTPATH ?= github.com/golangci/golangci-lint/cmd/golangci-lint
 
 # Default output directory for executables and associated (copied) files
 BUILDDIR ?= build
@@ -120,8 +121,8 @@ lint:: pre-lint standard-lint post-lint
 pre-lint::
 
 standard-lint:: generate
-	$(GO) mod why github.com/golangci/golangci-lint/cmd/golangci-lint 2> /dev/null | \
-		( ! grep "does not need package" ) 2>&1 > /dev/null || \
+	$(GO) mod why $(GOLINTERIMPORTPATH) 2> /dev/null | \
+		tail -1 | grep '^$(GOLINTERIMPORTPATH)$$' 2>&1 > /dev/null || \
 		( if [ -f tools.go ]; then \
 			eval "$$_common_make_tools_lint_help"; \
 		  else \
