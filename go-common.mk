@@ -30,6 +30,7 @@ GODEBUG ?=
 GOBUILDFLAGS ?=
 GOBUILDENV ?=
 GORUNGENERATE ?= yes
+GOGENERATEENV ?=
 GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -race
 GOTESTENV ?=
@@ -110,7 +111,7 @@ pre-generate::
 
 standard-generate::
 ifdef GORUNGENERATE
-	$(GO) generate ./...
+	$(GOGENERATEENV) $(GO) generate ./...
 endif # GORUNGENERATE
 
 post-generate::
