@@ -176,7 +176,9 @@ _commonupdate::
 
 # Test coverage files
 $(GOTESTCOVERRAW):
-	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=$@ $(GOTESTTARGET)
+	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=cover.out.tmp $(GOTESTTARGET)
+	grep -v "fake_" cover.out.tmp > $@
+	rm cover.out.tmp
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	$(GO) tool cover -html=$< -o $@
