@@ -122,7 +122,7 @@ lint:: pre-lint standard-lint post-lint
 pre-lint::
 
 standard-lint:: generate
-	$(GO) mod why $(GOLINTERIMPORTPATH) 2> /dev/null | \
+	@$(GO) mod why $(GOLINTERIMPORTPATH) 2> /dev/null | \
 		tail -1 | grep '^$(GOLINTERIMPORTPATH)$$' 2>&1 > /dev/null || \
 		( if [ -f tools.go ]; then \
 			eval "$$_common_make_tools_lint_help"; \
@@ -181,12 +181,14 @@ $(GOTESTCOVERRAW):
 	rm cover.out.tmp
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
+	@# Exclude mocks and fakes from coverage
+	@sed -i.mock -e '/mock/d' -e '/fake_/d' $< && rm -f "$<.mock"
 	$(GO) tool cover -html=$< -o $@
 	@# To allow Code Climate to understand our uploaded coverage files
 	@case "$$(grep '^module' go.mod | awk -F/ '{print$$NF}')" in \
 		v[0-9]) \
-			sed -i.versioned -e 's!/v[0-9]/!/!' "$(GOTESTCOVERRAW)" "$(GOTESTCOVERHTML)" && \
-			rm -f "$(GOTESTCOVERRAW).versioned" "$(GOTESTCOVERHTML).versioned" \
+			sed -i.versioned -e 's!/v[0-9]/!/!' $< $@ && \
+			rm -f "$<.versioned" "$@.versioned" \
 			;; \
 	esac
 
