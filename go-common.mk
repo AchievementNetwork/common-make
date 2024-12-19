@@ -71,6 +71,7 @@ endif # GODEBUG
 .PHONY: pre-test standard-test post-test
 .PHONY: pre-testcover standard-testcover post-testcover
 .PHONY: _checkcommonupdate _commonupdate
+.PHONY: $(GOTESTCOVERRAW) $(GOTESTCOVERHTML)
 
 ## External targets
 # These may be overridden and used in repo Makefiles
