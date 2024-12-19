@@ -71,7 +71,6 @@ endif # GODEBUG
 .PHONY: pre-test standard-test post-test
 .PHONY: pre-testcover standard-testcover post-testcover
 .PHONY: _checkcommonupdate _commonupdate
-.PHONY: $(GOTESTCOVERRAW) $(GOTESTCOVERHTML)
 
 ## External targets
 # These may be overridden and used in repo Makefiles
@@ -176,7 +175,7 @@ _commonupdate::
 # Names may change at any time
 
 # Test coverage files
-$(GOTESTCOVERRAW):
+$(GOTESTCOVERRAW): $(shell find . -type f -name '*_test.go')
 	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=cover.out.tmp $(GOTESTTARGET)
 	grep -v "fake_" cover.out.tmp > $@
 	rm cover.out.tmp
