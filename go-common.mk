@@ -175,7 +175,7 @@ _commonupdate::
 # Names may change at any time
 
 # Test coverage files
-$(GOTESTCOVERRAW): $(shell find . -type f -name '*_test.go')
+$(GOTESTCOVERRAW): $(GOSRC)
 	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=cover.out.tmp $(GOTESTTARGET)
 	grep -v "fake_" cover.out.tmp > $@
 	rm cover.out.tmp
