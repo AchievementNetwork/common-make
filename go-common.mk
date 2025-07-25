@@ -30,8 +30,10 @@ GODEBUG ?=
 GOBUILDFLAGS ?=
 GOBUILDENV ?=
 GORUNGENERATE ?= yes
+GOGENERATEENV ?=
 GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -race
+GOTEST ?= $(GO) test
 GOTESTENV ?=
 GOTESTCOVERRAW ?= coverage.raw
 GOTESTCOVERHTML ?= coverage.html
@@ -110,7 +112,7 @@ pre-generate::
 
 standard-generate::
 ifdef GORUNGENERATE
-	$(GO) generate ./...
+	$(GOGENERATEENV) $(GO) generate ./...
 endif # GORUNGENERATE
 
 post-generate::
@@ -139,7 +141,7 @@ test:: pre-test standard-test post-test
 pre-test::
 
 standard-test:: generate
-	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) $(GOTESTTARGET)
+	$(GOTESTENV) $(GOTEST) $(GOTESTFLAGS) $(GOTESTTARGET)
 
 post-test::
 
@@ -174,8 +176,10 @@ _commonupdate::
 # Names may change at any time
 
 # Test coverage files
-$(GOTESTCOVERRAW):
-	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=$@ $(GOTESTTARGET)
+$(GOTESTCOVERRAW): $(GOSRC)
+	$(GOTESTENV) $(GOTEST) $(GOTESTFLAGS) -coverprofile=cover.out.tmp $(GOTESTTARGET)
+	grep -v "fake_" cover.out.tmp > $@
+	rm cover.out.tmp
 
 $(GOTESTCOVERHTML): $(GOTESTCOVERRAW)
 	@# Exclude mocks and fakes from coverage
