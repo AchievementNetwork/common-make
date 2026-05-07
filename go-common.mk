@@ -33,6 +33,7 @@ GORUNGENERATE ?= yes
 GOGENERATEENV ?=
 GOTESTTARGET ?= ./...
 GOTESTFLAGS ?= -race
+GOTEST ?= $(GO) test
 GOTESTENV ?=
 GOTESTCOVERRAW ?= coverage.raw
 GOTESTCOVERHTML ?= coverage.html
@@ -140,7 +141,7 @@ test:: pre-test standard-test post-test
 pre-test::
 
 standard-test:: generate
-	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) $(GOTESTTARGET)
+	$(GOTESTENV) $(GOTEST) $(GOTESTFLAGS) $(GOTESTTARGET)
 
 post-test::
 
@@ -176,7 +177,7 @@ _commonupdate::
 
 # Test coverage files
 $(GOTESTCOVERRAW): $(GOSRC)
-	$(GOTESTENV) $(GO) test $(GOTESTFLAGS) -coverprofile=cover.out.tmp $(GOTESTTARGET)
+	$(GOTESTENV) $(GOTEST) $(GOTESTFLAGS) -coverprofile=cover.out.tmp $(GOTESTTARGET)
 	grep -v "fake_" cover.out.tmp > $@
 	rm cover.out.tmp
 
